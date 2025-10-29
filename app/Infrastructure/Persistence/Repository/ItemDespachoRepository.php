@@ -3,18 +3,18 @@
 namespace App\Infrastructure\Persistence\Repository;
 
 use App\Infrastructure\Persistence\Model\ItemDespacho as ItemDespachoModel;
-use App\Domain\Produccion\Aggregate\ItemDespacho as AggregateItemDespacho;
 use App\Domain\Produccion\Repository\ItemDespachoRepositoryInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Domain\Produccion\Entity\ItemDespacho;
 
 class ItemDespachoRepository implements ItemDespachoRepositoryInterface
 {
     /**
      * @param string $id
      * @throws ModelNotFoundException
-     * @return AggregateItemDespacho|null
+     * @return ItemDespacho|null
      */
-    public function byId(string $id): ?AggregateItemDespacho
+    public function byId(string $id): ?ItemDespacho
     {
         $row = ItemDespachoModel::find($id);
 
@@ -22,34 +22,26 @@ class ItemDespachoRepository implements ItemDespachoRepositoryInterface
             throw new ModelNotFoundException("El item despacho id: {$id} no existe.");
         }
 
-        return new AggregateItemDespacho(
+        return new ItemDespacho(
             $row->id,
-            $row->lista_id,
-            $row->sku,
-            $row->etiqueta_id,
-            $row->paciente_id,
-            $row->direccion_snapshot,
-            $row->ventana_entrega
+            $row->op_id,
+            $row->product_id,
+            $row->paquete_id
         );
     }
 
     /**
-     * @param AggregateItemDespacho $item
+     * @param ItemDespacho $item
      * @return void
      */
-    public function save(AggregateItemDespacho $item): void
+    public function save(ItemDespacho $item): void
     {
         ItemDespachoModel::updateOrCreate(
-            ['id' => $item->id],
+            ['id' => null],
             [
-                'lista_id' => $item->listaId,
-                'sku' => $item->sku,
-                'etiqueta_id' => $item->etiquetaId,
-                'paciente_id' => $item->pacienteId,
-                'direccion_snapshot' => $item->direccionSnapshot,
-                'ventana_entrega' => $item->ventanaEntrega,
-                'created_at' => now(),
-                'updated_at' => now()
+                'op_id' => $item->ordenProduccionId,
+                'product_id' => $item->productId,
+                'paquete_id' => $item->paqueteId
             ]
         );
     }

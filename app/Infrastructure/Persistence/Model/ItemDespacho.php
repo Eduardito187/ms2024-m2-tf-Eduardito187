@@ -1,26 +1,50 @@
 <?php
+/**
+ * Microservicio "Produccion y Cocina"
+ */
 
 namespace App\Infrastructure\Persistence\Model;
 
-use App\Infrastructure\Persistence\Model\ListaDespacho;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ItemDespacho extends Model
+/**
+ * @package App\Infrastructure\Persistence\Model
+ */
+class ItemDespacho extends BaseModel
 {
-  protected $table = 'item_despacho';
-  protected $primaryKey = 'id';
-  public $incrementing = true;
-  protected $keyType = 'int';
-  protected $fillable = ['lista_id', 'sku', 'etiqueta_id', 'paciente_id', 'direccion_snapshot', 'ventana_entrega'];
-    protected $casts = ['direccion_snapshot'=> 'array', 'ventana_entrega'=> 'array'];
-  public $timestamps = true;
+    protected $table = 'item_despacho';
+    protected $guarded = [];
 
-  /**
-   * @return BelongsTo
-   */
-  public function ordenProduccion() : BelongsTo
-  {
-    return $this->belongsTo(ListaDespacho::class, 'lista_id');
-  }
+    /**
+     * @return BelongsTo
+     */
+    public function ordenProduccion(): BelongsTo
+    {
+        return $this->belongsTo(OrdenProduccion::class, 'op_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function paquete(): BelongsTo
+    {
+        return $this->belongsTo(Paquete::class, 'paquete_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function calendarioItems(): HasMany
+    {
+        return $this->hasMany(CalendarioItem::class, 'item_despacho_id');
+    }
 }

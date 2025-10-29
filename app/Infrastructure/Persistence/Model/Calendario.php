@@ -10,20 +10,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @package App\Infrastructure\Persistence\Model
  */
-class Direccion extends BaseModel
+class Calendario extends BaseModel
 {
-    protected $table = 'direccion';
+    protected $table = 'calendario';
     protected $guarded = [];
 
     protected $casts = [
-        'geo' => 'array',
+        'fecha' => 'date',
     ];
 
     /**
      * @return HasMany
      */
-    public function paquetes(): HasMany
+    public function items(): HasMany
     {
-        return $this->hasMany(Paquete::class, 'direccion_id');
+        return $this->hasMany(CalendarioItem::class, 'calendario_id');
     }
 }

@@ -3,9 +3,9 @@
 namespace App\Domain\Produccion\Aggregate;
 
 use App\Domain\Produccion\Events\ProduccionBatchCreado;
+use App\Domain\Produccion\Enum\EstadoPlanificado;
 use App\Domain\Shared\Aggregate\AggregateRoot;
 use App\Domain\Produccion\ValueObjects\Qty;
-use App\Domain\Produccion\ValueObjects\Sku;
 use DomainException;
 
 class ProduccionBatch
@@ -18,9 +18,14 @@ class ProduccionBatch
     public readonly int|null $id;
 
     /**
-     * @var string
+     * @var int
      */
-    public readonly string $ordenProduccionId;
+    public readonly int $ordenProduccionId;
+
+    /**
+     * @var int
+     */
+    public readonly int $productoId;
 
     /**
      * @var int
@@ -45,7 +50,7 @@ class ProduccionBatch
     /**
      * @var int
      */
-    public readonly int $cantProducida;
+    public int $cantProducida;
 
     /**
      * @var int
@@ -58,9 +63,9 @@ class ProduccionBatch
     public EstadoPlanificado $estado;
 
     /**
-     * @var Sku
+     * @var float
      */
-    public readonly Sku $sku;
+    public float $rendimiento;
 
     /**
      * @var Qty
@@ -73,15 +78,16 @@ class ProduccionBatch
     public readonly int $posicion;
 
     /**
-     * @var array
+     * @var array|null
      */
-    public readonly array $ruta;
+    public readonly array|null $ruta;
 
     /**
      * Constructor
      * 
      * @param int|null $id
      * @param int $ordenProduccionId
+     * @param int $productoId
      * @param int $estacionId
      * @param int $recetaVersionId
      * @param int $porcionId
@@ -89,14 +95,15 @@ class ProduccionBatch
      * @param int $cantProducida
      * @param int $mermaGr
      * @param EstadoPlanificado $estado
-     * @param Sku $sku
+     * @param float $rendimiento
      * @param Qty $qty
      * @param int $posicion
-     * @param array $ruta
+     * @param array|null $ruta
      */
     public function __construct(
         int|null $id,
         int $ordenProduccionId,
+        int $productoId,
         int $estacionId,
         int $recetaVersionId,
         int $porcionId,
@@ -104,13 +111,14 @@ class ProduccionBatch
         int $cantProducida,
         int $mermaGr,
         EstadoPlanificado $estado,
-        Sku $sku,
+        float $rendimiento,
         Qty $qty,
         int $posicion,
-        array $ruta
+        array|null $ruta = []
     ) {
         $this->id = $id;
         $this->ordenProduccionId = $ordenProduccionId;
+        $this->productoId = $productoId;
         $this->estacionId = $estacionId;
         $this->recetaVersionId = $recetaVersionId;
         $this->porcionId = $porcionId;
@@ -118,7 +126,7 @@ class ProduccionBatch
         $this->cantProducida = $cantProducida;
         $this->mermaGr = $mermaGr;
         $this->estado = $estado;
-        $this->sku = $sku;
+        $this->rendimiento = $rendimiento;
         $this->qty = $qty;
         $this->posicion = $posicion;
         $this->ruta = $ruta;
@@ -127,6 +135,7 @@ class ProduccionBatch
     /**
      * @param int|null $id
      * @param int $ordenProduccionId
+     * @param int $productoId
      * @param int $estacionId
      * @param int $recetaVersionId
      * @param int $porcionId
@@ -134,7 +143,7 @@ class ProduccionBatch
      * @param int $cantProducida
      * @param int $mermaGr
      * @param EstadoPlanificado $estado
-     * @param Sku $sku
+     * @param float $rendimiento
      * @param Qty $qty
      * @param int $posicion
      * @param array $ruta
@@ -143,6 +152,7 @@ class ProduccionBatch
     public static function crear(
         int|null $id,
         int $ordenProduccionId,
+        int $productoId,
         int $estacionId,
         int $recetaVersionId,
         int $porcionId,
@@ -150,7 +160,7 @@ class ProduccionBatch
         int $cantProducida,
         int $mermaGr,
         EstadoPlanificado $estado,
-        Sku $sku,
+        float $rendimiento,
         Qty $qty,
         int $posicion,
         array $ruta
@@ -159,6 +169,7 @@ class ProduccionBatch
         $self = new self(
             $id,
             $ordenProduccionId,
+            $productoId,
             $estacionId,
             $recetaVersionId,
             $porcionId,
@@ -166,7 +177,7 @@ class ProduccionBatch
             $cantProducida,
             $mermaGr,
             $estado,
-            $sku,
+            $rendimiento,
             $qty,
             $posicion,
             $ruta
@@ -177,7 +188,6 @@ class ProduccionBatch
                 $id,
                 $ordenProduccionId,
                 $estacionId,
-                $sku,
                 $qty,
                 $posicion
             )
@@ -196,6 +206,7 @@ class ProduccionBatch
             throw new DomainException('No se puede procesar en su estado actual el batch.');
         }
 
+        $this->cantProducida = $this->cantPlanificada;
         $this->estado = EstadoPlanificado::PROCESANDO;
     }
 

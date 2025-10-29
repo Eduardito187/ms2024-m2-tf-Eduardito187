@@ -1,34 +1,34 @@
 <?php
+/**
+ * Microservicio "Produccion y Cocina"
+ */
 
 namespace App\Infrastructure\Persistence\Model;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Infrastructure\Persistence\Model\Suscripcion;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Paciente extends Model
+/**
+ * @package App\Infrastructure\Persistence\Model
+ */
+class Paciente extends BaseModel
 {
-    use HasFactory;
-
     protected $table = 'paciente';
-    protected $primaryKey = 'id';
-    public $incrementing = true;
-    public $timestamps = true;
-    protected $fillable = [
-        'nombre',
-        'documento',
-    ];
-    protected $casts = [
-        'created_at'=> 'datetime',
-        'updated_at'=> 'datetime',
-    ];
+    protected $guarded = [];
 
-    /** 
+    /**
+     * @return BelongsTo
+     */
+    public function suscripcion(): BelongsTo
+    {
+        return $this->belongsTo(Suscripcion::class, 'suscripcion_id');
+    }
+
+    /**
      * @return HasMany
      */
-    public function suscripciones(): HasMany
+    public function etiquetas(): HasMany
     {
-        return $this->hasMany(Suscripcion::class, 'paciente_id');
+        return $this->hasMany(Etiqueta::class, 'paciente_id');
     }
 }

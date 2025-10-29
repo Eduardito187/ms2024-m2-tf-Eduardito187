@@ -1,15 +1,15 @@
 <?php
+/**
+ * Microservicio "Produccion y Cocina"
+ */
 
 namespace App\Infrastructure\Persistence\Model;
 
-use Illuminate\Database\Eloquent\Model;
-
-class InboundEvent extends Model
+/**
+ * @package App\Infrastructure\Persistence\Model
+ */
+class InboundEvent extends BaseModel
 {
     protected $table = 'inbound_events';
-    protected $primaryKey = 'id';
-    public $incrementing = true;
-    protected $keyType = 'int';
-    protected $fillable = ['event_id', 'event_name', 'occurred_on', 'payload'];
-    public $timestamps = true;
+    protected $guarded = [];
 }

@@ -6,9 +6,8 @@ use App\Infrastructure\Persistence\Model\ProduccionBatch as ProduccionBatchModel
 use App\Domain\Produccion\Aggregate\ProduccionBatch as AggregateProduccionBatch;
 use App\Domain\Produccion\Repository\ProduccionBatchRepositoryInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Domain\Produccion\Aggregate\EstadoPlanificado;
+use App\Domain\Produccion\Enum\EstadoPlanificado;
 use App\Domain\Produccion\ValueObjects\Qty;
-use App\Domain\Produccion\ValueObjects\Sku;
 
 class ProduccionBatchRepository implements ProduccionBatchRepositoryInterface
 {
@@ -28,6 +27,7 @@ class ProduccionBatchRepository implements ProduccionBatchRepositoryInterface
         return new AggregateProduccionBatch(
             $row->id,
             $row->op_id,
+            $row->p_id,
             $row->estacion_id,
             $row->receta_version_id,
             $row->porcion_id,
@@ -35,7 +35,7 @@ class ProduccionBatchRepository implements ProduccionBatchRepositoryInterface
             $row->cant_producida,
             $row->merma_gr,
             EstadoPlanificado::from($row->estado),
-            new Sku($row->sku),
+            $row->rendimiento,
             new Qty($row->qty),
             $row->posicion,
             $row->ruta
@@ -65,6 +65,7 @@ class ProduccionBatchRepository implements ProduccionBatchRepositoryInterface
             $item[] = new AggregateProduccionBatch(
                 $row->id,
                 $row->op_id,
+                $row->p_id,
                 $row->estacion_id,
                 $row->receta_version_id,
                 $row->porcion_id,
@@ -72,7 +73,7 @@ class ProduccionBatchRepository implements ProduccionBatchRepositoryInterface
                 $row->cant_producida,
                 $row->merma_gr,
                 EstadoPlanificado::from($row->estado),
-                new Sku($row->sku),
+                $row->rendimiento,
                 new Qty($row->qty),
                 $row->posicion,
                 $row->ruta
@@ -92,6 +93,7 @@ class ProduccionBatchRepository implements ProduccionBatchRepositoryInterface
             ['id' => $pb->id],
             [
                 'op_id' => $pb->ordenProduccionId,
+                'p_id' => $pb->productoId,
                 'estacion_id' => $pb->estacionId,
                 'receta_version_id' => $pb->recetaVersionId,
                 'porcion_id' => $pb->porcionId,
@@ -99,7 +101,7 @@ class ProduccionBatchRepository implements ProduccionBatchRepositoryInterface
                 'cant_producida' => $pb->cantProducida,
                 'merma_gr' => $pb->mermaGr,
                 'estado' => $pb->estado,
-                'sku' => $pb->sku->value(),
+                'rendimiento' => $pb->rendimiento,
                 'qty' => $pb->qty->value(),
                 'posicion' => $pb->posicion,
                 'ruta' => $pb->ruta

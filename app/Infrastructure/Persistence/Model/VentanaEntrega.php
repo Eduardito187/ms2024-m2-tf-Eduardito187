@@ -1,26 +1,29 @@
 <?php
+/**
+ * Microservicio "Produccion y Cocina"
+ */
 
 namespace App\Infrastructure\Persistence\Model;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class VentanaEntrega extends Model
+/**
+ * @package App\Infrastructure\Persistence\Model
+ */
+class VentanaEntrega extends BaseModel
 {
-    use HasFactory;
-
     protected $table = 'ventana_entrega';
-    protected $primaryKey = 'id';
-    public $incrementing = true;
-    public $timestamps = true;
-    protected $fillable = [
-        'desde',
-        'hasta',
-    ];
+    protected $guarded = [];
     protected $casts = [
         'desde' => 'datetime',
         'hasta' => 'datetime',
-        'created_at'=> 'datetime',
-        'updated_at'=> 'datetime',
     ];
+
+    /**
+     * @return HasMany
+     */
+    public function paquetes(): HasMany
+    {
+        return $this->hasMany(Paquete::class, 'ventana_id');
+    }
 }

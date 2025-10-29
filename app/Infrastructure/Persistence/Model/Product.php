@@ -10,25 +10,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @package App\Infrastructure\Persistence\Model
  */
-class OrdenProduccion extends BaseModel
+class Product extends BaseModel
 {
-    protected $table = 'orden_produccion';
+    protected $table = 'products';
     protected $guarded = [];
 
     /**
      * @return HasMany
      */
-    public function items(): HasMany
+    public function orderItems(): HasMany
     {
-        return $this->hasMany(OrderItem::class, 'op_id');
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function batches(): HasMany
-    {
-        return $this->hasMany(ProduccionBatch::class, 'op_id');
+        return $this->hasMany(OrderItem::class, 'p_id');
     }
 
     /**
@@ -36,6 +28,14 @@ class OrdenProduccion extends BaseModel
      */
     public function despachoItems(): HasMany
     {
-        return $this->hasMany(ItemDespacho::class, 'op_id');
+        return $this->hasMany(ItemDespacho::class, 'product_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function batches(): HasMany
+    {
+        return $this->hasMany(ProduccionBatch::class, 'p_id');
     }
 }

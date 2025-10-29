@@ -2,14 +2,9 @@
 
 namespace App\Application\Produccion\Handler;
 
-use App\Domain\Produccion\Aggregate\ListaDespacho as AggregateListaDespacho;
-use App\Domain\Produccion\Repository\ProduccionBatchRepositoryInterface;
 use App\Domain\Produccion\Repository\OrdenProduccionRepositoryInterface;
-use App\Infrastructure\Persistence\Repository\ListaDespachoRepository;
 use App\Application\Support\Transaction\TransactionAggregate;
 use App\Application\Produccion\Command\DespachadorOP;
-use App\Domain\Produccion\ValueObjects\ItemDespacho;
-use App\Domain\Produccion\Model\DespachoItems;
 use DateTimeImmutable;
 
 class DespachadorOPHandler
@@ -17,17 +12,7 @@ class DespachadorOPHandler
     /**
      * @var OrdenProduccionRepositoryInterface
      */
-    public readonly OrdenProduccionRepositoryInterface $ordenProduccionRepository;
-
-    /**
-     * @var ProduccionBatchRepositoryInterface
-     */
-    public readonly ProduccionBatchRepositoryInterface $produccionBatchRepositoryInterface;
-
-    /**
-     * @var ListaDespachoRepository
-     */
-    public readonly ListaDespachoRepository $listaDespachoRepository;
+    public readonly OrdenProduccionRepositoryInterface $ordenProduccionRepositoryInterface;
 
     /**
      * @var TransactionAggregate
@@ -37,20 +22,14 @@ class DespachadorOPHandler
     /**
      * Constructor
      * 
-     * @param OrdenProduccionRepositoryInterface $ordenProduccionRepository
-     * @param ProduccionBatchRepositoryInterface $produccionBatchRepositoryInterface
-     * @param ListaDespachoRepository $listaDespachoRepository
+     * @param OrdenProduccionRepositoryInterface $ordenProduccionRepositoryInterface
      * @param TransactionAggregate $transactionAggregate
      */
     public function __construct(
-        OrdenProduccionRepositoryInterface $ordenProduccionRepository,
-        ProduccionBatchRepositoryInterface $produccionBatchRepositoryInterface,
-        ListaDespachoRepository $listaDespachoRepository,
+        OrdenProduccionRepositoryInterface $ordenProduccionRepositoryInterface,
         TransactionAggregate $transactionAggregate
     ) {
-        $this->ordenProduccionRepository = $ordenProduccionRepository;
-        $this->produccionBatchRepositoryInterface = $produccionBatchRepositoryInterface;
-        $this->listaDespachoRepository = $listaDespachoRepository;
+        $this->ordenProduccionRepositoryInterface = $ordenProduccionRepositoryInterface;
         $this->transactionAggregate = $transactionAggregate;
     }
 
@@ -60,26 +39,13 @@ class DespachadorOPHandler
      */
     public function __invoke(DespachadorOP $command): string|int|null
     {
+        //etiqueta y paquete
         return $this->transactionAggregate->runTransaction(function () use ($command): int {
-            $ordenProduccion = $this->ordenProduccionRepository->byId($command->opId);
-            $listaDespacho = AggregateListaDespacho::crear($command->opId,  new DateTimeImmutable("now"),  $ordenProduccion->sucursalId());
-            $itemsDespacho = [];
-
-            foreach ($ordenProduccion->items() as $item) {
-                $itemsDespacho[] = new ItemDespacho($listaDespacho->id, $item->sku(), 1, 1);
-            }
-
-            $itemsDespacho = DespachoItems::fromArray($itemsDespacho);
-            $listaDespacho->replaceItems($itemsDespacho);
-            $this->listaDespachoRepository->save($listaDespacho, true);
-
-            foreach ($this->produccionBatchRepositoryInterface->byOrderId($command->opId) as $item) {
-                $item->despachar();
-                $this->produccionBatchRepositoryInterface->save($item);
-            }
-
+            $ordenProduccion = $this->ordenProduccionRepositoryInterface->byId($command->opId);
+            $ordenProduccion->generarItemsDespacho();
+            $ordenProduccion->despacharBatches();
             $ordenProduccion->cerrar();
-            return $this->ordenProduccionRepository->save($ordenProduccion, false, true);
+            return $this->ordenProduccionRepositoryInterface->save($ordenProduccion);
         });
     }
 }

@@ -50,13 +50,13 @@ class ProcesadorOPHandler
         return $this->transactionAggregate->runTransaction(function () use ($command): int {
             $ordenProduccion = $this->ordenProduccionRepository->byId($command->opId);
 
-            foreach ($this->produccionBatchRepositoryInterface->byOrderId($command->opId) as $item) {
+            foreach ($ordenProduccion->batches() as $item) {
                 $item->procesar();
                 $this->produccionBatchRepositoryInterface->save($item);
             }
 
             $ordenProduccion->procesar();
-            return $this->ordenProduccionRepository->save($ordenProduccion, false, true);
+            return $this->ordenProduccionRepository->save($ordenProduccion);
         });
     }
 }

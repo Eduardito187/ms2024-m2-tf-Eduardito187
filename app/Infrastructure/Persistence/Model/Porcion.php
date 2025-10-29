@@ -1,25 +1,25 @@
 <?php
+/**
+ * Microservicio "Produccion y Cocina"
+ */
 
 namespace App\Infrastructure\Persistence\Model;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Porcion extends Model
+/**
+ * @package App\Infrastructure\Persistence\Model
+ */
+class Porcion extends BaseModel
 {
-    use HasFactory;
-
     protected $table = 'porcion';
-    protected $primaryKey = 'id';
-    public $incrementing = true;
-    public $timestamps = true;
-    protected $fillable = [
-        'nombre',
-        'peso_gr',
-    ];
-    protected $casts = [
-        'peso_gr'    => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    protected $guarded = [];
+
+    /**
+     * @return HasMany
+     */
+    public function batches(): HasMany
+    {
+        return $this->hasMany(ProduccionBatch::class, 'porcion_id');
+    }
 }
